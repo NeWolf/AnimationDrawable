@@ -228,7 +228,7 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
         if (sample != getSampleSize()) {
             val tempRunning: Boolean = isRunning()
             workerHandler.removeCallbacks(renderTask)
-            workerHandler.post(Runnable {
+            workerHandler.post {
                 innerStop()
                 try {
                     sampleSize = sample
@@ -239,7 +239,7 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
-            })
+            }
         }
         return sample
     }
@@ -325,7 +325,7 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
                 DebugLog.dTag(TAG, "In finishing,do not interrupt")
             }
             val thread = Thread.currentThread()
-            workerHandler.post(Runnable {
+            workerHandler.post {
                 try {
                     if (fullRect == null) {
                         if (mReader == null) {
@@ -341,7 +341,7 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
                 } finally {
                     LockSupport.unpark(thread)
                 }
-            })
+            }
             LockSupport.park(thread)
         }
         return fullRect ?: RECT_EMPTY

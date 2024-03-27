@@ -1,4 +1,3 @@
-import org.gradle.api.internal.DocumentationRegistry.BASE_URL
 
 plugins {
     alias(libs.plugins.androidLibrary)
@@ -61,7 +60,7 @@ afterEvaluate {
                 groupId = "com.github.NeWolf"
                 artifactId = "FrameAnimation"
                 version = "V${libs.versions.versionName.get()}"
-                artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+                artifact("$projectDir/outputs/aar/${project.name}-release.aar")
             }
         }
 
