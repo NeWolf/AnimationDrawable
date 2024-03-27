@@ -1,0 +1,2 @@
+-keepclassmembers class com.newolf.widget.** { *; }
+-dontwarn com.newolf.widget.**

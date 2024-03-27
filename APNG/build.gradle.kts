@@ -48,16 +48,38 @@ android {
             }
         }
     }
-    namespace = "com.github.NeWolf.APNG"
+//    namespace = "com.github.NeWolf.APNG"
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                //from(components.findByName("release"))
+                from(components["release"])
+                groupId = "com.github.NeWolf"
+                artifactId = "APNG"
+                version = "V${libs.versions.versionName.get()}"
+                artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+            }
+        }
+
+        // Add the following block for configuring the repository
+        repositories {
+            maven {
+                name = "jitpack"
+                url = uri("https://jitpack.io")
+            }
+        }
+    }
 }
 
 
 
 dependencies {
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+    compileOnly(libs.androidx.core.ktx)
+    compileOnly(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

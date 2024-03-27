@@ -49,13 +49,37 @@ android {
             }
         }
     }
-    namespace = "com.github.NeWolf.FrameAnimation"
+//    namespace = "com.github.NeWolf.FrameAnimation"
 }
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                //from(components.findByName("release"))
+                from(components["release"])
+                groupId = "com.github.NeWolf"
+                artifactId = "FrameAnimation"
+                version = "V${libs.versions.versionName.get()}"
+                artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+            }
+        }
+
+        // Add the following block for configuring the repository
+        repositories {
+            maven {
+                name = "jitpack"
+                url = uri("https://jitpack.io")
+            }
+        }
+    }
+}
+
 
 dependencies {
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
+    compileOnly(libs.androidx.core.ktx)
+    compileOnly(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -20,3 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+#-keep class com.newolf.widget.** { *; }
+-keepclassmembers class com.newolf.widget.** { *; }
+-dontwarn com.newolf.widget.**

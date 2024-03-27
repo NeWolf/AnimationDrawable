@@ -44,8 +44,8 @@ class StreamReader(`in`: InputStream) :FilterInputStream(`in`) ,Reader{
     }
 
     @Throws(IOException::class)
-    override fun read(buffer: ByteArray?, offset: Int, lengh: Int): Int {
-        val ret = super.read(buffer, offset, lengh)
+    override fun read(buffer: ByteArray?, start: Int, byteCount: Int): Int {
+        val ret = super.read(buffer, start, byteCount)
         position += max(0, ret)
         return ret
     }
@@ -58,8 +58,8 @@ class StreamReader(`in`: InputStream) :FilterInputStream(`in`) ,Reader{
     }
 
     @Throws(IOException::class)
-    override fun skip(n: Long): Long {
-        var toSkip = n
+    override fun skip(total: Long): Long {
+        var toSkip = total
         while (toSkip > 0) {
             val skipped = super.skip(toSkip)
             if (skipped > 0) {
@@ -77,8 +77,8 @@ class StreamReader(`in`: InputStream) :FilterInputStream(`in`) ,Reader{
                 }
             }
         }
-        position += (n - toSkip).toInt()
-        return n - toSkip
+        position += (total - toSkip).toInt()
+        return total - toSkip
     }
 
 

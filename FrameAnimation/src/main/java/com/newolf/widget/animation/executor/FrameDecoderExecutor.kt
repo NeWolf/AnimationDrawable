@@ -30,7 +30,7 @@ class FrameDecoderExecutor private constructor() {
         } else {
             run {
                 val looper: Looper = mHandlerThreadGroup[idx].getLooper()
-                looper ?: Looper.getMainLooper()
+                looper
             }
         }
     }

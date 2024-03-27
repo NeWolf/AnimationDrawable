@@ -160,7 +160,7 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
         frames.clear()
         synchronized(cacheBitmapsLock) {
             for (bitmap in cacheBitmaps) {
-                if (bitmap != null && !bitmap.isRecycled) {
+                if (!bitmap.isRecycled) {
                     bitmap.recycle()
                 }
             }
@@ -175,9 +175,7 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
                 mReader!!.close()
                 mReader = null
             }
-            if (mWriter != null) {
-                mWriter.close()
-            }
+            mWriter.close()
         } catch (e: IOException) {
             e.printStackTrace()
         }
