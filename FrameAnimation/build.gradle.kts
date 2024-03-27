@@ -3,7 +3,12 @@ import org.gradle.api.internal.DocumentationRegistry.BASE_URL
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id ("maven-publish")
 }
+
+group = "com.github.NeWolf"
+version = libs.versions.versionName.get()
+
 
 android {
     namespace = "com.newolf.widget.animation"
