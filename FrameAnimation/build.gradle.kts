@@ -60,7 +60,7 @@ afterEvaluate {
                 groupId = "com.github.NeWolf"
                 artifactId = "FrameAnimation"
                 version = "V${libs.versions.versionName.get()}"
-                artifact("$projectDir/outputs/aar/${project.name}-release.aar")
+//                artifact("$buildDir/outputs/aar/${project.name}-release.aar")
             }
         }
 

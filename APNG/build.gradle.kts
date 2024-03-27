@@ -60,7 +60,7 @@ afterEvaluate {
                 groupId = "com.github.NeWolf"
                 artifactId = "APNG"
                 version = "V${libs.versions.versionName.get()}"
-                artifact("$projectDir/outputs/aar/${project.name}-release.aar")
+//                artifact("$projectDir/outputs/aar/${project.name}-release.aar")
             }
         }
 
