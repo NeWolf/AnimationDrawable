@@ -6,6 +6,7 @@ plugins {
 }
 
 group = "com.github.NeWolf"
+artifact=""
 version = libs.versions.versionName.get()
 
 android {
@@ -45,12 +46,25 @@ android {
 
 dependencies {
 
-//    implementation(libs.androidx.core.ktx)
-//    implementation(libs.androidx.appcompat)
-//    implementation(libs.material)
-//    testImplementation(libs.junit)
-//    androidTestImplementation(libs.androidx.junit)
-//    androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+//    api("com.github.NeWolf:FrameAnimation:1.0.0")
 }
 
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release
+                groupId = "com.github.NeWolf"
+                artifactId = "APNG"
+            }
+        }
+    }
+}
 
