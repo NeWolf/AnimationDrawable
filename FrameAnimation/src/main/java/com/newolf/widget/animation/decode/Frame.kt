@@ -25,7 +25,7 @@ abstract class Frame<R : Reader?, W : Writer?>(reader: R) {
     var frameHeight = 0
     var frameX = 0
     var frameY = 0
-    var frameDuration = 0
+    var frameDuration:Long = 0L
     protected val srcRect = Rect()
     protected val dstRect = Rect()
 
