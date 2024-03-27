@@ -6,8 +6,8 @@ plugins {
     id ("maven-publish")
 }
 
-group = "com.github.NeWolf"
-version = libs.versions.versionName.get()
+//group = "com.github.NeWolf"
+//version = libs.versions.versionName.get()
 
 
 android {
@@ -42,6 +42,14 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+    publishing {
+        publishing {
+            singleVariant("release") {
+                withSourcesJar()
+            }
+        }
+    }
+    namespace = "com.github.NeWolf.FrameAnimation"
 }
 
 dependencies {
@@ -53,15 +61,3 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            // Creates a Maven publication called "release".
-            release(MavenPublication) {
-                from components.release
-                groupId = "com.github.NeWolf"
-                artifactId = "FrameAnimation"
-            }
-        }
-    }
-}

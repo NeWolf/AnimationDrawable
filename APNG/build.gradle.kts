@@ -5,9 +5,8 @@ plugins {
     id ("maven-publish")
 }
 
-group = "com.github.NeWolf"
-artifact=""
-version = libs.versions.versionName.get()
+//group = "com.github.NeWolf"
+//version = libs.versions.versionName.get()
 
 android {
     namespace = "com.newolf.widget.drawable.apng"
@@ -40,6 +39,16 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    publishing {
+        publishing {
+            singleVariant("release") {
+                withSourcesJar()
+//                withJavadocJar()
+            }
+        }
+    }
+    namespace = "com.github.NeWolf.APNG"
 }
 
 
@@ -55,16 +64,5 @@ dependencies {
 //    api("com.github.NeWolf:FrameAnimation:1.0.0")
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            // Creates a Maven publication called "release".
-            release(MavenPublication) {
-                from components.release
-                groupId = "com.github.NeWolf"
-                artifactId = "APNG"
-            }
-        }
-    }
-}
+
 
