@@ -11,5 +11,5 @@ package com.newolf.widget.animation
  * =======================================================================
  */
 object Config {
-    var IS_DEBUG = true
+    var IS_DEBUG = false
 }

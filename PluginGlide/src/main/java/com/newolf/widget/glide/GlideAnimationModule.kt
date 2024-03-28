@@ -3,12 +3,12 @@ package com.newolf.widget.glide
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import android.util.Log
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Registry
 import com.bumptech.glide.annotation.GlideModule
 import com.bumptech.glide.module.LibraryGlideModule
 import com.newolf.widget.animation.decode.FrameSeqDecoder
+import com.newolf.widget.animation.utils.DebugLog
 import java.io.InputStream
 import java.nio.ByteBuffer
 
@@ -23,9 +23,13 @@ import java.nio.ByteBuffer
  * =======================================================================
  */
 @GlideModule
-class GlideAnimationModule: LibraryGlideModule() {
+class GlideAnimationModule : LibraryGlideModule() {
+    companion object {
+        const val TAG = "GlideAnimationModule"
+    }
+
     override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
-        Log.e("wolf", "registerComponents: ",Exception() )
+        DebugLog.dTag(TAG, "registerComponents: ")
         super.registerComponents(context, glide, registry)
         val byteBufferAnimationDecoder = ByteBufferAnimationDecoder()
         val streamAnimationDecoder = StreamAnimationDecoder(byteBufferAnimationDecoder)

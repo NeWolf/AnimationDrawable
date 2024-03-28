@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 class FrameDecoderExecutor private constructor() {
     fun generateTaskId(): Int {
-        return counter.getAndDecrement()
+        return counter.getAndIncrement()
     }
 
     fun getLooper(taskId: Int): Looper {
