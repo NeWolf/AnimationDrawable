@@ -76,7 +76,7 @@ dependencies {
     api(project(":APNG"))
     compileOnly(libs.androidx.core.ktx)
     compileOnly(libs.androidx.appcompat)
-    implementation("com.github.bumptech.glide:glide:4.12.0")
+    compileOnly("com.github.bumptech.glide:glide:4.12.0")
     kapt("com.github.bumptech.glide:compiler:4.12.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
