@@ -1,12 +1,11 @@
 package com.newolf.widget.animation.decode
 
+
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
-
-
 import androidx.annotation.WorkerThread
 import com.newolf.widget.animation.Config
 import com.newolf.widget.animation.executor.FrameDecoderExecutor
@@ -55,11 +54,12 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
         if (renderListener != null) {
             this.renderListeners.add(renderListener)
         }
-        DebugLog.dTag(TAG, "taskId = $ taskId, workerHandler = $workerHandler")
+
+        DebugLog.dTag(TAG, "taskId = $taskId, workerHandler = $workerHandler")
     }
 
-    fun addRenderListener(renderListener: RenderListener?) {
-        workerHandler.post { renderListeners.remove(renderListener) }
+    fun addRenderListener(renderListener: RenderListener) {
+        workerHandler.post { renderListeners.add(renderListener) }
     }
 
     fun removeRenderListener(renderListener: RenderListener?) {
@@ -67,16 +67,14 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
     }
 
 
-    private var sampleSize = 1
-    fun getSampleSize(): Int {
-        return sampleSize
-    }
+    var sampleSize = 1
+
 
     private val paused = AtomicBoolean(true)
 
     private var finished = false
     private var playCount: Int = -1
-    private var frameIndex: Int = -1
+    var frameIndex: Int = -1
     private fun canStep(): Boolean {
         if (!isRunning()) {
             return false
@@ -111,8 +109,8 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
 
     private val renderTask: Runnable = object : Runnable {
         override fun run() {
-            DebugLog.dTag(TAG, "$this is run")
             if (paused.get()) {
+                DebugLog.dTag(TAG, "renderTask $this paused return")
                 return
             }
             if (canStep()) {
@@ -124,6 +122,7 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
                     frameBuffer?.let { listener.onRender(it) }
                 }
             } else {
+                DebugLog.dTag(TAG, "renderTask $this can not Step, stop")
                 stop()
             }
         }
@@ -223,9 +222,9 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
     }
 
     fun setDesiredSize(width: Int, height: Int): Int {
-        DebugLog.dTag(TAG, "width = $width, height = $height")
+        DebugLog.dTag(TAG, "setDesiredSize: width = $width, height = $height")
         val sample: Int = getDesiredSample(width, height)
-        if (sample != getSampleSize()) {
+        if (sample != sampleSize) {
             val tempRunning: Boolean = isRunning()
             workerHandler.removeCallbacks(renderTask)
             workerHandler.post {
@@ -237,7 +236,7 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
                         innerStart()
                     }
                 } catch (e: IOException) {
-                    e.printStackTrace()
+                    DebugLog.eTag(TAG, "setDesiredSize has IOException", e)
                 }
             }
         }
@@ -351,7 +350,7 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
     private fun initCanvasBounds(rect: Rect) {
         fullRect = rect
         frameBuffer =
-            ByteBuffer.allocate((rect.width() * rect.height() / (getSampleSize() * getSampleSize()) + 1) * 4)
+            ByteBuffer.allocate((rect.width() * rect.height() / (sampleSize * sampleSize) + 1) * 4)
 
     }
 
@@ -394,5 +393,117 @@ abstract class FrameSeqDecoder<R : Reader, W : Writer>(
         }
     }
 
+
+    protected fun obtainBitmap(width: Int, height: Int): Bitmap? {
+        synchronized(cacheBitmapsLock) {
+            var ret: Bitmap? = null
+            val iterator =
+                cacheBitmaps.iterator()
+            while (iterator.hasNext()) {
+                val reuseSize = width * height * 4
+                ret = iterator.next()
+                if (ret.getAllocationByteCount() >= reuseSize) {
+                    iterator.remove()
+                    if (ret.getWidth() != width || ret.getHeight() != height) {
+                        if (width > 0 && height > 0) {
+                            ret.reconfigure(width, height, Bitmap.Config.ARGB_8888)
+                        }
+                    }
+                    ret.eraseColor(0)
+                    return ret
+                }
+            }
+            if (width <= 0 || height <= 0) {
+                return null
+            }
+            try {
+                val config = Bitmap.Config.ARGB_8888
+                ret = Bitmap.createBitmap(width, height, config)
+            } catch (e: java.lang.Exception) {
+                e.printStackTrace()
+            } catch (e: OutOfMemoryError) {
+                e.printStackTrace()
+            }
+            return ret
+        }
+    }
+
+    protected fun recycleBitmap(bitmap: Bitmap?) {
+        synchronized(cacheBitmapsLock) {
+            if (bitmap != null) {
+                cacheBitmaps.add(bitmap)
+            }
+        }
+    }
+
+    fun resume() {
+        paused.compareAndSet(true, false)
+        workerHandler.removeCallbacks(renderTask)
+        workerHandler.post(renderTask)
+    }
+
+
+    //    ====================================For Glide===================================
+    fun getMemorySize(): Int {
+        synchronized(cacheBitmapsLock) {
+            var size = 0
+            for (bitmap in cacheBitmaps) {
+                if (bitmap.isRecycled) {
+                    continue
+                }
+                size +=
+                    bitmap.getAllocationByteCount()
+            }
+            if (frameBuffer != null) {
+                size += frameBuffer!!.capacity()
+            }
+            return size
+        }
+    }
+
+    fun getFrameBitmap(index: Int): Bitmap? {
+        if (mState != State.IDLE) {
+            DebugLog.dTag(TAG, debugInfo() + ",stop first")
+            return null
+        }
+
+
+
+        mState = State.RUNNING
+        paused.compareAndSet(true, false)
+        if (frames.size == 0) {
+            if (mReader == null) {
+                mReader = getReader(mLoader.obtain())
+            } else {
+                mReader!!.reset()
+            }
+            initCanvasBounds(read(mReader!!))
+        }
+        var tempIndex = index
+        if (tempIndex < 0) {
+            tempIndex += frames.size
+        }
+        if (tempIndex < 0) {
+            tempIndex = 0
+        }
+        frameIndex = -1
+        while (frameIndex < tempIndex) {
+            if (canStep()) {
+                step()
+            } else {
+                break
+            }
+        }
+        frameBuffer!!.rewind()
+        val bitmap = Bitmap.createBitmap(
+            getBounds().width() / sampleSize,
+            getBounds().height() / sampleSize,
+            Bitmap.Config.ARGB_8888
+        )
+        bitmap.copyPixelsFromBuffer(frameBuffer!!)
+        innerStop()
+        return bitmap
+    }
+//    ====================================For Glide===================================
 
 }

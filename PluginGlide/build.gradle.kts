@@ -1,19 +1,16 @@
-
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id ("maven-publish")
+    id("kotlin-kapt")
 }
 
-//group = "com.github.NeWolf"
-//version = libs.versions.versionName.get()
-
 android {
-    namespace = "com.newolf.widget.drawable.apng"
+    namespace = "com.newolf.widget.glide"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
-    buildFeatures{
-        buildConfig=true
+    buildFeatures {
+        buildConfig = true
     }
 
     defaultConfig {
@@ -23,6 +20,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -39,16 +37,14 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-
     publishing {
         publishing {
             singleVariant("release") {
                 withSourcesJar()
-//                withJavadocJar()
             }
         }
     }
-//    namespace = "com.github.NeWolf.APNG"
+//    namespace = "com.github.NeWolf.FrameAnimation"
 }
 
 afterEvaluate {
@@ -58,9 +54,9 @@ afterEvaluate {
                 //from(components.findByName("release"))
                 from(components["release"])
                 groupId = "com.github.NeWolf"
-                artifactId = "APNG"
+                artifactId = "PluginGlide"
                 version = "V${libs.versions.versionName.get()}"
-//                artifact("$projectDir/outputs/aar/${project.name}-release.aar")
+//                artifact("$buildDir/outputs/aar/${project.name}-release.aar")
             }
         }
 
@@ -75,19 +71,14 @@ afterEvaluate {
 }
 
 
-
 dependencies {
 
-    api(project(":FrameAnimation"))
+    api(project(":APNG"))
     compileOnly(libs.androidx.core.ktx)
     compileOnly(libs.androidx.appcompat)
+    implementation("com.github.bumptech.glide:glide:4.12.0")
+    kapt("com.github.bumptech.glide:compiler:4.12.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-//    api("com.github.NeWolf:FrameAnimation:1.0.0")
-//    api(libs.frame)
-
 }
-
-
-

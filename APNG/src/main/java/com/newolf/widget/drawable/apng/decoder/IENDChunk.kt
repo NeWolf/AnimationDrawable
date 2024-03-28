@@ -1,4 +1,4 @@
-package com.newolf.widget.animation
+package com.newolf.widget.drawable.apng.decoder
 
 /**
  * ======================================================================
@@ -6,10 +6,12 @@ package com.newolf.widget.animation
  *
  * @author : NeWolf
  * @version : 1.0
- * @since :  2024-03-26
+ * @since :  2024-03-27
  *
  * =======================================================================
  */
-object Config {
-    var IS_DEBUG = true
+class IENDChunk : Chunk() {
+    companion object{
+        val ID = fourCCToInt("IEND")
+    }
 }

@@ -20,6 +20,7 @@ import com.newolf.widget.animation.loader.Loader
 import com.newolf.widget.animation.utils.DebugLog
 import java.lang.ref.WeakReference
 import java.nio.ByteBuffer
+import kotlin.math.max
 
 /**
  * ======================================================================
@@ -77,6 +78,7 @@ abstract class FrameAnimationDrawable<Decoder : FrameSeqDecoder<*, *>> : Drawabl
      */
     override fun draw(canvas: Canvas) {
         if (bitmap == null || bitmap?.isRecycled == true) {
+            DebugLog.dTag(TAG, "draw: bitmap is null or isRecycled, return")
             return
         }
         canvas.setDrawFilter(drawFilter)
@@ -84,21 +86,25 @@ abstract class FrameAnimationDrawable<Decoder : FrameSeqDecoder<*, *>> : Drawabl
     }
 
 
+
     override fun setBounds(left: Int, top: Int, right: Int, bottom: Int) {
-        DebugLog.dTag(TAG, "left = $left , top = $top , right = $right , bottom = $bottom")
+        DebugLog.dTag(TAG,"setBounds:left = $left , top = $top , right = $right , bottom = $bottom")
         super.setBounds(left, top, right, bottom)
-        val oldSampleSize = frameSeqDecoder.getSampleSize()
+        val oldSampleSize = frameSeqDecoder.sampleSize
         val sampleSize = frameSeqDecoder.setDesiredSize(bounds.width(), bounds.height())
         matrix.setScale(
             1.0f * getBounds().width() * sampleSize / frameSeqDecoder.getBounds().width(),
             1.0f * getBounds().height() * sampleSize / frameSeqDecoder.getBounds().height()
         )
+
+        DebugLog.dTag(TAG, "setBounds:sampleSize = $sampleSize, oldSampleSize = $oldSampleSize")
         if (sampleSize != oldSampleSize) {
             bitmap = Bitmap.createBitmap(
                 frameSeqDecoder.getBounds().width() / sampleSize,
                 frameSeqDecoder.getBounds().height() / sampleSize,
                 Bitmap.Config.ARGB_8888
             )
+            DebugLog.dTag(TAG, "setBounds:bitmap = $bitmap")
         }
     }
 
@@ -196,12 +202,9 @@ abstract class FrameAnimationDrawable<Decoder : FrameSeqDecoder<*, *>> : Drawabl
     }
 
     override fun setVisible(visible: Boolean, restart: Boolean): Boolean {
+        DebugLog.dTag(TAG,"$this,visible:$visible,restart:$restart")
         hookRecordCallbacks()
         if (autoPlay) {
-            DebugLog.dTag(
-                TAG,
-                "$this,visible:$visible,restart:$restart"
-            )
             if (visible) {
                 if (!isRunning) {
                     innerStart()
@@ -366,18 +369,22 @@ abstract class FrameAnimationDrawable<Decoder : FrameSeqDecoder<*, *>> : Drawabl
      */
     override fun onRender(byteBuffer: ByteBuffer) {
         if (!isRunning) {
+            DebugLog.dTag(TAG,"onRender:byteBuffer = $byteBuffer, isRunning = $isRunning, return")
             return
         }
         if (bitmap == null || bitmap?.isRecycled == true) {
             bitmap = Bitmap.createBitmap(
-                frameSeqDecoder.getBounds().width() / frameSeqDecoder.getSampleSize(),
-                frameSeqDecoder.getBounds().height() / frameSeqDecoder.getSampleSize(),
+                frameSeqDecoder.getBounds().width() / frameSeqDecoder.sampleSize,
+                frameSeqDecoder.getBounds().height() / frameSeqDecoder.sampleSize,
                 Bitmap.Config.ARGB_8888
             )
+
+            DebugLog.dTag(TAG,"onRender:bitmap = $bitmap, isRunning = $isRunning")
+
         }
         byteBuffer.rewind()
         if (byteBuffer.remaining() < (bitmap?.getByteCount() ?: 0)) {
-            Log.e(TAG, "onRender:Buffer not large enough for pixels")
+            Log.e(TAG, "onRender:Buffer not large enough for pixels,return")
             return
         }
         bitmap!!.copyPixelsFromBuffer(byteBuffer)
@@ -394,4 +401,51 @@ abstract class FrameAnimationDrawable<Decoder : FrameSeqDecoder<*, *>> : Drawabl
     }
 
     //    ====================================RenderListener===================================
+
+    fun resume() {
+        frameSeqDecoder.resume()
+    }
+
+
+//    ====================================For Glide===================================
+    fun setAutoPlay(isAuto:Boolean){
+        autoPlay = isAuto
+    }
+
+    private var isNoMeasure = false
+    fun setNoMeasure(noMeasure:Boolean){
+        isNoMeasure = noMeasure
+    }
+
+    override fun getIntrinsicWidth(): Int {
+        return if (isNoMeasure) {
+            -1
+        } else try {
+            frameSeqDecoder.getBounds().width()
+        } catch (exception: Exception) {
+            0
+        }
+    }
+
+    override fun getIntrinsicHeight(): Int {
+        return if (isNoMeasure) {
+            -1
+        } else try {
+            frameSeqDecoder.getBounds().height()
+        } catch (exception: Exception) {
+            0
+        }
+    }
+
+    fun getMemorySize(): Int {
+        var size: Int = frameSeqDecoder.getMemorySize()
+        if (bitmap != null && !bitmap!!.isRecycled) {
+            size +=
+                bitmap!!.getAllocationByteCount()
+        }
+        return max(1, size)
+    }
+
+
+    //    ====================================For Glide===================================
 }
