@@ -13,6 +13,6 @@ import com.bumptech.glide.module.AppGlideModule
  *
  * =======================================================================
  */
-@GlideModule
+//@GlideModule
 class CusTomGlideModule:AppGlideModule() {
 }
