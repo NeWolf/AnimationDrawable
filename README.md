@@ -24,5 +24,7 @@ dependencyResolutionManagement {
 	        implementation 'com.github.NeWolf.AnimationDrawable:APNG:V2.1.0'
 	}
 ```
-
+## Step 3. Use in code
+```
 imageView.setImageDrable(APNGDrawable.fromResource(context,resId))
+```
